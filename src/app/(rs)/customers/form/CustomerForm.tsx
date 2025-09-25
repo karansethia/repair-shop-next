@@ -11,24 +11,38 @@ import TextareaWithLabel from "@/components/inputs/TextareaWithLabel"
 import SelectWithLabel from "@/components/inputs/SelectWithLabel"
 import { StatesArray } from "@/constants/StatesArray"
 
+import { useAction } from "next-safe-action/hooks"
+import { saveCustomerAction } from "@/app/actions/saveCustomerAction"
+import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
+import { DisplayServerActionResponse } from "@/components/DisplayServerActionResponse"
+
+import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs"
+import CheckboxWithLabel from "@/components/inputs/CheckboxWithLabel"
+
 type Props = {
   customer?: SelectCustomerSchemaType
 }
 
 const CustomerForm = ({ customer }: Props) => {
 
+  const { getPermission, isLoading } = useKindeBrowserClient()
+
+  const isManager = !isLoading && getPermission('manager')?.isGranted;
+
   const defaultValues: InsertCustomerSchemaType = {
     id: customer?.id || 0,
-    firstName: customer?.firstName || "",
-    lastName: customer?.lastName || "",
-    address1: customer?.address1 || "",
-    address2: customer?.address2 || "",
-    city: customer?.city || "",
-    state: customer?.state || "",
-    zip: customer?.zip || "",
-    phone: customer?.phone || "",
-    email: customer?.email || "",
-    notes: customer?.notes || "",
+    firstName: customer?.firstName ?? "",
+    lastName: customer?.lastName ?? "",
+    address1: customer?.address1 ?? "",
+    address2: customer?.address2 ?? "",
+    city: customer?.city ?? "",
+    state: customer?.state ?? "",
+    zip: customer?.zip ?? "",
+    phone: customer?.phone ?? "",
+    email: customer?.email ?? "",
+    notes: customer?.notes ?? "",
+    active: customer?.active ?? true,
   }
 
   const form = useForm<InsertCustomerSchemaType>({
@@ -37,14 +51,26 @@ const CustomerForm = ({ customer }: Props) => {
     defaultValues
   })
 
+  const {
+    execute: saveCustomerDetails, result, isExecuting, reset
+  } = useAction(saveCustomerAction, {
+    onSuccess({ data }) {
+      toast.success("Customer Saved")
+    },
+    onError({ error }) {
+      toast.error("Something went wrong")
+    }
+  })
+
   const submitHandler = async (data: InsertCustomerSchemaType) => {
-    console.log(data)
+    saveCustomerDetails(data)
   }
   return (
     <div className="flex flex-col gap-1 sm:px-8">
+      <DisplayServerActionResponse result={result} />
       <div>
         <h2 className="text-2xl font-bold">
-          {customer?.id ? "Edit " : "New "} Customer Form
+          {customer?.id ? "Edit " : "New "} Customer {customer?.id ? `#${customer.id}` : "Form"}
         </h2>
       </div>
       <Form {...form}>
@@ -62,9 +88,18 @@ const CustomerForm = ({ customer }: Props) => {
             <InputWithLabel<InsertCustomerSchemaType> fieldTitle="E-mail" nameInSchema="email" />
             <InputWithLabel<InsertCustomerSchemaType> fieldTitle="Phone" nameInSchema="phone" />
             <TextareaWithLabel<InsertCustomerSchemaType> fieldTitle="Notes" nameInSchema="notes" className="resize-none h-40" />
+            {isLoading ? <p>Loading...</p> : isManager && customer?.id ?
+              <CheckboxWithLabel<InsertCustomerSchemaType> fieldTitle="Customer Active Status" nameInSchema="active" message="status" />
+              : null}
             <div className="flex gap-2">
-              <Button type="submit" className="w-3/4" variant="default" title="Save">Save</Button>
-              <Button type="button" className="" variant="destructive" onClick={() => form.reset(defaultValues)}>Reset</Button>
+              <Button type="submit" className="w-3/4" variant="default" title="Save" disabled={isExecuting}>
+                {isExecuting ? <Loader2 className="animate-spin" /> : "Save"}
+              </Button>
+              <Button type="button" className="" variant="destructive"
+                onClick={() => {
+                  form.reset(defaultValues)
+                  reset()
+                }}>Reset</Button>
             </div>
           </div>
         </form>
