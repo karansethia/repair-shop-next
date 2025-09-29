@@ -20,20 +20,41 @@ import { DisplayServerActionResponse } from "@/components/DisplayServerActionRes
 // import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs"
 import CheckboxWithLabel from "@/components/inputs/CheckboxWithLabel"
 
+import { useSearchParams } from "next/navigation"
+import { useEffect } from "react"
+
 type Props = {
   customer?: SelectCustomerSchemaType,
   isManager: boolean | undefined
 }
 
+const emptyValues: InsertCustomerSchemaType = {
+  id: 0,
+  firstName: "",
+  lastName: "",
+  address1: "",
+  address2: "",
+  city: "",
+  state: "",
+  zip: "",
+  phone: "",
+  email: "",
+  notes: "",
+  active: true,
+}
+
 const CustomerForm = ({ customer, isManager }: Props) => {
 
+  const searchParams = useSearchParams()
+
+  const hasCustomerId = searchParams.has("customerId")
 
   // Client side authentication from kinde
   // const { getPermission, isLoading } = useKindeBrowserClient()
 
   // const isManager = !isLoading && getPermission('manager')?.isGranted;
 
-  const defaultValues: InsertCustomerSchemaType = {
+  const defaultValues: InsertCustomerSchemaType = hasCustomerId ? {
     id: customer?.id || 0,
     firstName: customer?.firstName ?? "",
     lastName: customer?.lastName ?? "",
@@ -46,13 +67,17 @@ const CustomerForm = ({ customer, isManager }: Props) => {
     email: customer?.email ?? "",
     notes: customer?.notes ?? "",
     active: customer?.active ?? true,
-  }
+  } : emptyValues
 
   const form = useForm<InsertCustomerSchemaType>({
     mode: "onBlur",
     resolver: zodResolver(insertCustomerSchema),
     defaultValues
   })
+
+  useEffect(() => {
+    form.reset(hasCustomerId ? defaultValues : emptyValues)
+  }, [searchParams.get("customerId")])
 
   const {
     execute: saveCustomerDetails, result, isExecuting, reset
