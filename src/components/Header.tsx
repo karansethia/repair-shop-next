@@ -4,6 +4,7 @@ import NavButton from "./NavButton";
 import { ModeToggle } from "./ModeToggle";
 import { Button } from "./ui/button";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { NavButtonMenu } from "./NavButtonMenu";
 
 const Header = () => {
   return (
@@ -18,7 +19,10 @@ const Header = () => {
         </div>
         <div className="flex items-center">
           <NavButton label="Tickets" href="/tickets" icon={File} />
-          <NavButton label="Customers" href="/customers" icon={UsersRound} />
+          <NavButtonMenu icon={UsersRound} label="Customer Menu" choices={[
+            { title: "Search Customers", href: "/customers" },
+            { title: "New", href: "/customers/form" },
+          ]} />
           <ModeToggle />
           <Button asChild className="rounded-full" variant="ghost" size="icon">
             <LogoutLink><LogOut /></LogoutLink>

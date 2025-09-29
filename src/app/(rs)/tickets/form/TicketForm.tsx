@@ -22,12 +22,11 @@ type Props = {
   techs?: { id: string, description: string }[],
   isEditable?: boolean,
   ticket?: SelectTicketSchemaType,
-  customer: SelectCustomerSchemaType
+  customer: SelectCustomerSchemaType,
+  isManager?: boolean | undefined,
 }
 
-const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
-
-  const isManager = Array.isArray(techs);
+const TicketForm = ({ customer, ticket, techs, isEditable = true, isManager = false }: Props) => {
 
   const defaultValues: InsertTicketSchemaType = {
     id: ticket?.id ?? "(New)",
@@ -70,7 +69,7 @@ const TicketForm = ({ customer, ticket, techs, isEditable = true }: Props) => {
         <form onSubmit={form.handleSubmit(submitHandler)} className="flex flex-col sm:flex-row gap-4 sm:gap-8">
           <div className="flex flex-col gap-3 w-1/3">
             <InputWithLabel<InsertTicketSchemaType> fieldTitle="Title" nameInSchema="title" disabled={!isEditable} />
-            {isManager ?
+            {isManager && techs ?
               <SelectWithLabel<InsertTicketSchemaType> fieldTitle="Technician" nameInSchema="tech" data={[
                 { id: 'new-ticket@example.com', description: 'new-ticket@example.com' },
                 ...techs

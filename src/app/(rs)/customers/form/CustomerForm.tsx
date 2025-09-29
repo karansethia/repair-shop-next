@@ -17,18 +17,21 @@ import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import { DisplayServerActionResponse } from "@/components/DisplayServerActionResponse"
 
-import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs"
+// import { useKindeBrowserClient } from "@kinde-oss/kinde-auth-nextjs"
 import CheckboxWithLabel from "@/components/inputs/CheckboxWithLabel"
 
 type Props = {
-  customer?: SelectCustomerSchemaType
+  customer?: SelectCustomerSchemaType,
+  isManager: boolean | undefined
 }
 
-const CustomerForm = ({ customer }: Props) => {
+const CustomerForm = ({ customer, isManager }: Props) => {
 
-  const { getPermission, isLoading } = useKindeBrowserClient()
 
-  const isManager = !isLoading && getPermission('manager')?.isGranted;
+  // Client side authentication from kinde
+  // const { getPermission, isLoading } = useKindeBrowserClient()
+
+  // const isManager = !isLoading && getPermission('manager')?.isGranted;
 
   const defaultValues: InsertCustomerSchemaType = {
     id: customer?.id || 0,
@@ -88,7 +91,7 @@ const CustomerForm = ({ customer }: Props) => {
             <InputWithLabel<InsertCustomerSchemaType> fieldTitle="E-mail" nameInSchema="email" />
             <InputWithLabel<InsertCustomerSchemaType> fieldTitle="Phone" nameInSchema="phone" />
             <TextareaWithLabel<InsertCustomerSchemaType> fieldTitle="Notes" nameInSchema="notes" className="resize-none h-40" />
-            {isLoading ? <p>Loading...</p> : isManager && customer?.id ?
+            {isManager && customer?.id ?
               <CheckboxWithLabel<InsertCustomerSchemaType> fieldTitle="Customer Active Status" nameInSchema="active" message="status" />
               : null}
             <div className="flex gap-2">

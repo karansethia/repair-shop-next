@@ -56,7 +56,7 @@ async function TicketFormPage({
         const { users } = await Users.getUsers()
 
         const techs = users ? users.map(user => ({ id: user.email!, description: user.email! })) : []
-        return <TicketForm customer={customer} techs={techs} />
+        return <TicketForm customer={customer} techs={techs} isManager={isManager} />
       } else {
         return <TicketForm customer={customer} />
       }
@@ -82,7 +82,7 @@ async function TicketFormPage({
         const { users } = await Users.getUsers()
 
         const techs = users ? users.map(user => ({ id: user.email!, description: user.email! })) : []
-        return <TicketForm customer={customer} ticket={ticket} techs={techs} />
+        return <TicketForm customer={customer} ticket={ticket} techs={techs} isManager={isManager} />
       } else {
 
         const isEditable = user!.email === ticket.tech;
